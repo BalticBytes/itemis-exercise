@@ -8,11 +8,62 @@ import (
 	"strconv"
 	"strings"
 
-	// "github.com/ttacon/chalk"
 	"github.com/urfave/cli/v2"
 )
 
+const (
+	numeralPattern  = "^([a-zA-Z]+) is ([IVXLCDM]+)$"
+	creditsPattern  = "^([a-zA-Z ]+) ([a-zA-Z]+) is ([0-9]+) [cC][rR][eE][dD][iI][tT][sS]$"
+	questionPattern = "^how (many [cC][rR][eE][dD][iI][tT][sS]|much) is ([a-zA-Z ]+)\\s+([a-zA-Z]*)\\s+\\?$"
+)
 
+var (
+	numeralRegex  = regexp.MustCompile(numeralPattern)
+	creditsRegex  = regexp.MustCompile(creditsPattern)
+	questionRegex = regexp.MustCompile(questionPattern)
+
+	amountByNumeral = map[string]float64{
+		"I": 1,
+		"V": 5,
+		"X": 10,
+		"L": 50,
+		"C": 100,
+		"D": 500,
+		"M": 1000,
+	}
+)
+
+// There is no "true" enum type so keyword is just a string
+type Question struct {
+	keyword string // much | many
+	amount  string
+	unit    *string // optional
+}
+
+func (q Question) String() string {
+	unit := "N/A"
+	if q.unit != nil {
+		unit = *q.unit
+	}
+	return fmt.Sprintf("{How %s is %s %s ?}", q.keyword, q.amount, unit)
+}
+
+func (q Question) calculate(m map[string]string) int {
+	parts := strings.Split(q.amount, " ")
+	translated := []float64{}
+	for _, part := range parts {
+		numeral := m[part]
+		translated = append(translated, amountByNumeral[numeral])
+	}
+	// TODO Validate Roman Numerals
+	for i, current := range translated {
+		if i+1 < len(translated) {
+			next := translated[i+1]
+		}
+	}
+	fmt.Println(translated)
+	return 0
+}
 
 func main() {
 	app := &cli.App{
@@ -43,89 +94,70 @@ func run(c *cli.Context) error {
 
 func processInput(input string) string {
 
-	numeral_pattern := "^([a-zA-Z]+) is ([IVXLCDM]+)$"
-	credits_pattern := "^([a-zA-Z ]+) ([a-zA-Z]+) is ([0-9]+) [cC][rR][eE][dD][iI][tT][sS]$"
-	question_pattern := "^how (many [cC][rR][eE][dD][iI][tT][sS]|much) is ([a-zA-Z ]+)\\s+([a-zA-Z]*)\\s+\\?$"
+	numeralById := map[string]string{}
+	amountByUnit := map[string]string{}
+	originalCreditConversionByUnit := map[string]float64{}
+	unitCostByUnit := map[string]float64{}
 
-	numeral_re := regexp.MustCompile(numeral_pattern)
-	credits_re := regexp.MustCompile(credits_pattern)
-	question_re := regexp.MustCompile(question_pattern)
-
-	amount_by_numeral := map[string]float64{
-		"I": 1,
-		"V": 5,
-		"X": 10,
-		"L": 50,
-		"C": 100,
-		"D": 500,
-		"M": 1000,
-	}
-	numeral_by_id := map[string]string{}
-	amount_by_unit := map[string]string{}
-	original_credit_conversion_by_unit := map[string]float64{}
-	unitCost_by_unit := map[string]float64{}
-
-	questions := []string{}
+	questions := []Question{}
 	var matches []string
 	for _, line := range strings.Split(input, "\n") {
 
-		if matches = numeral_re.FindStringSubmatch(line); matches != nil {
+		if matches = numeralRegex.FindStringSubmatch(line); matches != nil {
 			identifier := matches[1]
 			romanNumeral := matches[2]
-			numeral_by_id[identifier] = romanNumeral
+			numeralById[identifier] = romanNumeral
 		}
 
-		if matches = credits_re.FindStringSubmatch(line); matches != nil {
+		if matches = creditsRegex.FindStringSubmatch(line); matches != nil {
 			amount := matches[1]
 			unit := matches[2]
 
 			// We store it so that the order of the assignments is irrelevant
-			amount_by_unit[unit] = amount
+			amountByUnit[unit] = amount
 
 			if credits, err := strconv.ParseFloat(matches[3], 64); err == nil {
-				original_credit_conversion_by_unit[unit] = credits
+				originalCreditConversionByUnit[unit] = credits
 			}
 		}
 
-		if matches = question_re.FindStringSubmatch(line); matches != nil {
+		if matches = questionRegex.FindStringSubmatch(line); matches != nil {
 			keyword := matches[1]
 			amount := matches[2]
 			unit := matches[3]
-			questions = append(questions, line)
-
-			if keyword == "much" {
-				fmt.Printf("%s => %s %s\n", line, amount, unit)
-			} else {
-
-			}
-			fmt.Printf("'%s', '%s', '%s'\n", keyword, amount, unit)
+			questions = append(questions, Question{
+				keyword,
+				amount,
+				&unit,
+			})
 		}
 	}
 
-	os.Exit(0)
-
 	// calculate the amount
 
-	for unit, amount := range amount_by_unit {
+	for unit, amount := range amountByUnit {
 		xs := strings.Split(amount, " ")
 		amt := float64(0)
 		// Some symbols (letters) can be repeated up to 3 times in a row: I, X, C, M, (X), (C), (M).
 		for i := 0; i < len(xs); i++ {
 			x := xs[i]
-			y := numeral_by_id[x]
-			z := amount_by_numeral[y]
+			y := numeralById[x]
+			z := amountByNumeral[y]
 			amt += z
 		}
-		unitCost_by_unit[unit] = original_credit_conversion_by_unit[unit] / amt
-		fmt.Printf("%12s is %8.3f Credits because %3.0f x %.0f \n", unit, original_credit_conversion_by_unit[unit]/amt, amt, original_credit_conversion_by_unit[unit])
+		unitCostByUnit[unit] = originalCreditConversionByUnit[unit] / amt
+		fmt.Printf("%12s is %8.3f Credits because %3.0f x %.0f \n", unit, originalCreditConversionByUnit[unit]/amt, amt, originalCreditConversionByUnit[unit])
 	}
 
-	for k, v := range numeral_by_id {
-		fmt.Printf("%s: %-8s\n", k, v)
-	}
-
-	for k, v := range original_credit_conversion_by_unit {
-		fmt.Printf("%s: %-8d\n", k, v)
+	for _, question := range questions {
+		answer := ""
+		amount := question.calculate(numeralById)
+		if strings.Contains(question.keyword, "much") {
+			// Calculate Roman Numeral
+		} else {
+			// Transform
+		}
+		fmt.Println(question, answer, amount)
 	}
 
 	return input
