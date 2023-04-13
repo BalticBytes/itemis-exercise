@@ -12,6 +12,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+
+
 func main() {
 	app := &cli.App{
 		Name:   "exercise",
@@ -43,9 +45,11 @@ func processInput(input string) string {
 
 	numeral_pattern := "^([a-zA-Z]+) is ([IVXLCDM]+)$"
 	credits_pattern := "^([a-zA-Z ]+) ([a-zA-Z]+) is ([0-9]+) [cC][rR][eE][dD][iI][tT][sS]$"
+	question_pattern := "^how (many [cC][rR][eE][dD][iI][tT][sS]|much) is ([a-zA-Z ]+)\\s+([a-zA-Z]*)\\s+\\?$"
 
 	numeral_re := regexp.MustCompile(numeral_pattern)
 	credits_re := regexp.MustCompile(credits_pattern)
+	question_re := regexp.MustCompile(question_pattern)
 
 	amount_by_numeral := map[string]float64{
 		"I": 1,
@@ -61,6 +65,7 @@ func processInput(input string) string {
 	original_credit_conversion_by_unit := map[string]float64{}
 	unitCost_by_unit := map[string]float64{}
 
+	questions := []string{}
 	var matches []string
 	for _, line := range strings.Split(input, "\n") {
 
@@ -81,7 +86,23 @@ func processInput(input string) string {
 				original_credit_conversion_by_unit[unit] = credits
 			}
 		}
+
+		if matches = question_re.FindStringSubmatch(line); matches != nil {
+			keyword := matches[1]
+			amount := matches[2]
+			unit := matches[3]
+			questions = append(questions, line)
+
+			if keyword == "much" {
+				fmt.Printf("%s => %s %s\n", line, amount, unit)
+			} else {
+
+			}
+			fmt.Printf("'%s', '%s', '%s'\n", keyword, amount, unit)
+		}
 	}
+
+	os.Exit(0)
 
 	// calculate the amount
 
@@ -95,11 +116,9 @@ func processInput(input string) string {
 			z := amount_by_numeral[y]
 			amt += z
 		}
-		unitCost_by_unit[unit] = original_credit_conversion_by_unit[unit]/amt
+		unitCost_by_unit[unit] = original_credit_conversion_by_unit[unit] / amt
 		fmt.Printf("%12s is %8.3f Credits because %3.0f x %.0f \n", unit, original_credit_conversion_by_unit[unit]/amt, amt, original_credit_conversion_by_unit[unit])
 	}
-
-	os.Exit(0)
 
 	for k, v := range numeral_by_id {
 		fmt.Printf("%s: %-8s\n", k, v)
