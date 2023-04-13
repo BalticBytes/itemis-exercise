@@ -5,7 +5,7 @@ name: Go
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "fix-workflow" ]
   pull_request:
     branches: [ "main" ]
 
@@ -19,7 +19,10 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
-        go-version: 1.20
+        go-version: "1.20.3"
+
+    - name: Install
+      run: go mod tidy
 
     - name: Build
       run: go build -v ./...
