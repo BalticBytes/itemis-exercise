@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	// "github.com/ttacon/chalk"
@@ -40,38 +41,71 @@ func run(c *cli.Context) error {
 
 func processInput(input string) string {
 
-	pattern := []string{
-		"^([a-zA-Z]+) is ([IVXLCDM]+)$", // assignment
-	}
+	numeral_pattern := "^([a-zA-Z]+) is ([IVXLCDM]+)$"
+	credits_pattern := "^([a-zA-Z ]+) ([a-zA-Z]+) is ([0-9]+) [cC][rR][eE][dD][iI][tT][sS]$"
 
-	id_by_numeral := map[string]string{
-		"I": "",
-		"V": "",
-		"X": "",
-		"L": "",
-		"C": "",
-		"D": "",
-		"M": "",
-	}
+	numeral_re := regexp.MustCompile(numeral_pattern)
+	credits_re := regexp.MustCompile(credits_pattern)
 
+	amount_by_numeral := map[string]uint64{
+		"I": 1,
+		"V": 5,
+		"X": 10,
+		"L": 50,
+		"C": 100,
+		"D": 500,
+		"M": 1000,
+	}
+	numeral_by_id := map[string]string{}
+	amount_by_unit := map[string]string{}
+	credits_by_unit := map[string]uint64{}
+
+	var matches []string
 	for _, line := range strings.Split(input, "\n") {
-		for i := 0; i < len(pattern); i++ {
-			pattern := pattern[i]
-			re := regexp.MustCompile(pattern)
 
-			matches := re.FindStringSubmatch(line)
+		if matches = numeral_re.FindStringSubmatch(line); matches != nil {
+			identifier := matches[1]
+			romanNumeral := matches[2]
+			numeral_by_id[identifier] = romanNumeral
+		}
 
-			if matches != nil {
-				identifier := matches[1]
-				romanNumeral := matches[2]
-				// fmt.Printf("%s: %s\n", identifier, romanNumeral)
-				id_by_numeral[romanNumeral] = identifier
+		if matches = credits_re.FindStringSubmatch(line); matches != nil {
+			amount := matches[1]
+			unit := matches[2]
+
+			// We store it so that the order of the assignments is irrelevant
+			amount_by_unit[unit] = amount
+
+			// TODO consider defering the parsing until calculating the amount
+			if credits, err := strconv.ParseUint(matches[3], 10, 32); err == nil {
+				credits_by_unit[unit] = credits
 			}
 		}
 	}
 
-	for k, v := range id_by_numeral {
-		fmt.Printf("%s: %s\n", k, v)
+	// calculate the amount
+
+	for unit, amount := range amount_by_unit {
+		xs := strings.Split(amount, " ")
+		amt := uint64(0)
+		// Some symbols (letters) can be repeated up to 3 times in a row: I, X, C, M, (X), (C), (M).
+		for i := 0; i < len(xs); i++ {
+			x := xs[i]
+			y := numeral_by_id[x]
+			z := amount_by_numeral[y]
+			amt += z
+		}
+		fmt.Printf("%d %s is %d Credits\n", amt, unit, credits_by_unit[unit]/amt)
+	}
+
+	os.Exit(0)
+
+	for k, v := range numeral_by_id {
+		fmt.Printf("%s: %-8s\n", k, v)
+	}
+
+	for k, v := range credits_by_unit {
+		fmt.Printf("%s: %-8d\n", k, v)
 	}
 
 	return input
