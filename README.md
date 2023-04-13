@@ -32,7 +32,7 @@ The symbols "I", "X", "C", and "M" can be repeated three times in succession, bu
 "C" can be subtracted from "D" and "M" only.
 "V", "L", and "D" can never be subtracted. 
 Only one small-value symbol may be subtracted from any large-value symbol. 
-A number written in [16]Arabic numerals can be broken into digits. 
+A number written in [16] Arabic numerals can be broken into digits. 
 For example, 1903 is composed of 1, 9, 0, and 3. 
 To write the Roman numeral, each of the non-zero digits should be treated separately. 
 
