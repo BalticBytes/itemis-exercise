@@ -20,4 +20,4 @@ Additionally, golang has a nice and readable syntax so that should help reviewin
 | --- | --- | --- |
 | Programming Language | [go](https://go.dev/) | `go version go1.20.3`
 | CLI Framework |[urfave/cli](https://github.com/urfave/cli) | [Reference](https://github.com/shadawck/awesome-cli-frameworks)
-| Testing Framework | | TBD
+| Testing Framework | `testing` | golang builtin testing framework
