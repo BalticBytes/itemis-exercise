@@ -1,4 +1,4 @@
-module main
+module github.com/BalticBytes/itemis-exercise
 
 go 1.20
 
