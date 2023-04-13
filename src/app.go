@@ -47,7 +47,7 @@ func processInput(input string) string {
 	numeral_re := regexp.MustCompile(numeral_pattern)
 	credits_re := regexp.MustCompile(credits_pattern)
 
-	amount_by_numeral := map[string]uint64{
+	amount_by_numeral := map[string]float64{
 		"I": 1,
 		"V": 5,
 		"X": 10,
@@ -58,7 +58,8 @@ func processInput(input string) string {
 	}
 	numeral_by_id := map[string]string{}
 	amount_by_unit := map[string]string{}
-	credits_by_unit := map[string]uint64{}
+	original_credit_conversion_by_unit := map[string]float64{}
+	unitCost_by_unit := map[string]float64{}
 
 	var matches []string
 	for _, line := range strings.Split(input, "\n") {
@@ -76,9 +77,8 @@ func processInput(input string) string {
 			// We store it so that the order of the assignments is irrelevant
 			amount_by_unit[unit] = amount
 
-			// TODO consider defering the parsing until calculating the amount
-			if credits, err := strconv.ParseUint(matches[3], 10, 32); err == nil {
-				credits_by_unit[unit] = credits
+			if credits, err := strconv.ParseFloat(matches[3], 64); err == nil {
+				original_credit_conversion_by_unit[unit] = credits
 			}
 		}
 	}
@@ -87,7 +87,7 @@ func processInput(input string) string {
 
 	for unit, amount := range amount_by_unit {
 		xs := strings.Split(amount, " ")
-		amt := uint64(0)
+		amt := float64(0)
 		// Some symbols (letters) can be repeated up to 3 times in a row: I, X, C, M, (X), (C), (M).
 		for i := 0; i < len(xs); i++ {
 			x := xs[i]
@@ -95,7 +95,8 @@ func processInput(input string) string {
 			z := amount_by_numeral[y]
 			amt += z
 		}
-		fmt.Printf("%d %s is %d Credits\n", amt, unit, credits_by_unit[unit]/amt)
+		unitCost_by_unit[unit] = original_credit_conversion_by_unit[unit]/amt
+		fmt.Printf("%12s is %8.3f Credits because %3.0f x %.0f \n", unit, original_credit_conversion_by_unit[unit]/amt, amt, original_credit_conversion_by_unit[unit])
 	}
 
 	os.Exit(0)
@@ -104,7 +105,7 @@ func processInput(input string) string {
 		fmt.Printf("%s: %-8s\n", k, v)
 	}
 
-	for k, v := range credits_by_unit {
+	for k, v := range original_credit_conversion_by_unit {
 		fmt.Printf("%s: %-8d\n", k, v)
 	}
 
