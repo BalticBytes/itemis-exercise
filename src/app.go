@@ -49,20 +49,34 @@ func (q Question) String() string {
 }
 
 func (q Question) calculate(m map[string]string) int {
-	parts := strings.Split(q.amount, " ")
+	s, i := translate(m, q.amount)
+	fmt.Println(q.amount, s, i)
+	return i
+}
+
+// translates a string from intergalactic transaction to roman numerals.
+func translate(numeralByIntergalacticInput map[string]string, intergalacticInput string) (string, int) {
+	parts := strings.Split(intergalacticInput, " ")
+	romanNumerals := ""
 	translated := []float64{}
 	for _, part := range parts {
-		numeral := m[part]
+		numeral := numeralByIntergalacticInput[part]
 		translated = append(translated, amountByNumeral[numeral])
+		romanNumerals += numeral
 	}
 	// TODO Validate Roman Numerals
-	for i, current := range translated {
-		if i+1 < len(translated) {
-			next := translated[i+1]
+	sum := 0
+	last := -1
+	for i := len(translated) - 1; i >= 0; i-- {
+		x := int(translated[i])
+		if x < last {
+			sum -= x
+		} else {
+			sum += x
 		}
+		last = x
 	}
-	fmt.Println(translated)
-	return 0
+	return romanNumerals, sum
 }
 
 func main() {
@@ -150,14 +164,13 @@ func processInput(input string) string {
 	}
 
 	for _, question := range questions {
-		answer := ""
-		amount := question.calculate(numeralById)
+		credits := question.calculate(numeralById)
 		if strings.Contains(question.keyword, "much") {
 			// Calculate Roman Numeral
 		} else {
 			// Transform
 		}
-		fmt.Println(question, answer, amount)
+		fmt.Printf("%s %s is %d Credits\n", question.amount, *question.unit, credits)
 	}
 
 	return input
