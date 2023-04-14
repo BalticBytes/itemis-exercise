@@ -28,7 +28,7 @@ func TestProcessInput(t *testing.T) {
 	output := processInput(input)
 
 	if output != expectedOutput {
-		t.Errorf("processInput(%q) = %q, expected %q", input, output, expectedOutput)
+		t.Errorf("processInput(%s) = '%s'\nexpected %s", input, output, expectedOutput)
 	}
 }
 
@@ -69,12 +69,43 @@ func TestRomanNumeral(t *testing.T) {
 		{"X V I I I", 18},
 		{"X I X", 19},
 		{"X X", 20},
-		{"X I X", 29},
+		{"X X I X", 29},
 		{"X X X", 30},
 		{"X L", 40},
+		{"X L I X", 49},
 		{"L", 50},
+		{"L I V", 54},
+		{"L I X", 59},
+		{"L X I V", 64},
+		{"L X I X", 69},
+		{"L X X I V", 74},
+		{"L X X I X", 79},
+		{"L X X X I V", 84},
+		{"L X X X I X", 89},
 		{"X C", 90},
 		{"C", 100},
+		{"X C I V", 94},
+		{"X C I X", 99},
+		{"C I V", 104},
+		{"C I X", 109},
+		{"C X I V", 114},
+		{"C X I X", 119},
+		{"C X X I V", 124},
+		{"C X X I X", 129},
+		{"C X X X I V", 134},
+		{"C X X X I X", 139},
+		{"C X L I V", 144},
+		{"C X L I X", 149},
+		{"C L I V", 154},
+		{"C L I X", 159},
+		{"C L X I V", 164},
+		{"C L X I X", 169},
+		{"C L X X I V", 174},
+		{"C L X X I X", 179},
+		{"C L X X X I V", 184},
+		{"C L X X X I X", 189},
+		{"C X C I V", 194},
+		{"C X C I X", 199},
 		{"C D", 400},
 		{"D", 500},
 		{"C M", 900},
@@ -98,7 +129,7 @@ func TestRomanNumeral(t *testing.T) {
 		expected := pair.arabicNumeral
 		_, actual := translate(fakeIntergalacticMap, numeral)
 		if expected != actual {
-			t.Errorf("translate(%q) = %q, expected %q", numeral, actual, expected)
+			t.Errorf("translate(%q) = %d, expected %d", numeral, actual, expected)
 		}
 	}
 }

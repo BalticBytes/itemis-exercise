@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	numeralPattern  = "^([a-zA-Z]+) is ([IVXLCDM]+)$"
-	creditsPattern  = "^([a-zA-Z ]+) ([a-zA-Z]+) is ([0-9]+) [cC][rR][eE][dD][iI][tT][sS]$"
-	questionPattern = "^how (many [cC][rR][eE][dD][iI][tT][sS]|much) is ([a-zA-Z ]+)\\s+([a-zA-Z]*)\\s+\\?$"
+	numeralPattern  = "^\\s*([a-zA-Z]+)\\s+is\\s+([IVXLCDM]+)\\s*$"
+	creditsPattern  = "^\\s*([a-zA-Z ]+)\\s+([a-zA-Z]+)\\s+is\\s+([0-9]+)\\s*[cC][rR][eE][dD][iI][tT][sS]\\s*$"
+	questionPattern = "^\\s*how\\s*(many\\s+[cC][rR][eE][dD][iI][tT][sS]|much)\\s+is\\s+([a-zA-Z ]+)\\s+([a-zA-Z]*)\\s+\\?$"
 )
 
 var (
@@ -48,10 +48,11 @@ func (q Question) String() string {
 	return fmt.Sprintf("{How %s is %s %s ?}", q.keyword, q.amount, unit)
 }
 
-func (q Question) calculate(m map[string]string) int {
-	s, i := translate(m, q.amount)
-	fmt.Println(q.amount, s, i)
-	return i
+// returns the sum of an intergalactic
+func (q Question) calculate(m map[string]string, n map[string]float64) int {
+	_, i := translate(m, q.amount)
+
+	return int(float64(i) * n[*q.unit])
 }
 
 // translates a string from intergalactic transaction to roman numerals.
@@ -65,6 +66,7 @@ func translate(numeralByIntergalacticInput map[string]string, intergalacticInput
 		romanNumerals += numeral
 	}
 	// TODO Validate Roman Numerals
+	// Some symbols (letters) can be repeated up to 3 times in a row: I, X, C, M, (X), (C), (M).
 	sum := 0
 	last := -1
 	for i := len(translated) - 1; i >= 0; i-- {
@@ -99,9 +101,8 @@ func run(c *cli.Context) error {
 	}
 
 	input := args.Get(0)
-	processInput(input)
-	// output := processInput(input)
-	// fmt.Printf("%s", output)
+	output := processInput(input)
+	fmt.Printf("%s", output)
 
 	return nil
 }
@@ -121,6 +122,7 @@ func processInput(input string) string {
 			identifier := matches[1]
 			romanNumeral := matches[2]
 			numeralById[identifier] = romanNumeral
+			continue
 		}
 
 		if matches = creditsRegex.FindStringSubmatch(line); matches != nil {
@@ -133,6 +135,7 @@ func processInput(input string) string {
 			if credits, err := strconv.ParseFloat(matches[3], 64); err == nil {
 				originalCreditConversionByUnit[unit] = credits
 			}
+			continue
 		}
 
 		if matches = questionRegex.FindStringSubmatch(line); matches != nil {
@@ -144,34 +147,28 @@ func processInput(input string) string {
 				amount,
 				&unit,
 			})
+			continue
 		}
 	}
 
 	// calculate the amount
 
 	for unit, amount := range amountByUnit {
-		xs := strings.Split(amount, " ")
-		amt := float64(0)
-		// Some symbols (letters) can be repeated up to 3 times in a row: I, X, C, M, (X), (C), (M).
-		for i := 0; i < len(xs); i++ {
-			x := xs[i]
-			y := numeralById[x]
-			z := amountByNumeral[y]
-			amt += z
-		}
-		unitCostByUnit[unit] = originalCreditConversionByUnit[unit] / amt
-		fmt.Printf("%12s is %8.3f Credits because %3.0f x %.0f \n", unit, originalCreditConversionByUnit[unit]/amt, amt, originalCreditConversionByUnit[unit])
+		_, amt := translate(numeralById, amount)
+		unitCostByUnit[unit] = originalCreditConversionByUnit[unit] / float64(amt)
+		// fmt.Printf("%12s is %12.3f Credits because %4d x %.0f \n", unit, unitCostByUnit[unit], amt, originalCreditConversionByUnit[unit])
 	}
 
+	output := ""
 	for _, question := range questions {
-		credits := question.calculate(numeralById)
+		credits := question.calculate(numeralById, unitCostByUnit)
 		if strings.Contains(question.keyword, "much") {
 			// Calculate Roman Numeral
 		} else {
 			// Transform
 		}
-		fmt.Printf("%s %s is %d Credits\n", question.amount, *question.unit, credits)
+		output += fmt.Sprintf("%s %s is %d Credits\n", question.amount, *question.unit, credits)
 	}
 
-	return input
+	return output
 }
