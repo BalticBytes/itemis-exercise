@@ -149,6 +149,12 @@ func processInput(input string) string {
 			})
 			continue
 		}
+		// handle unknown question type
+		questions = append(questions, Question{
+			"not found",
+			"",
+			nil,
+		})
 	}
 
 	// calculate the amount
@@ -161,13 +167,17 @@ func processInput(input string) string {
 
 	output := ""
 	for _, question := range questions {
-		credits := question.calculate(numeralById, unitCostByUnit)
 		if strings.Contains(question.keyword, "much") {
 			// Calculate Roman Numeral
-		} else {
+			_, amt := translate(numeralById, question.amount)
+			output += fmt.Sprintf("%s %s is %d\n", question.amount, *question.unit, amt)
+		} else if strings.Contains(question.keyword, "many") {
 			// Transform
+			credits := question.calculate(numeralById, unitCostByUnit)
+			output += fmt.Sprintf("%s %s is %d Credits\n", question.amount, *question.unit, credits)
+		} else {
+			output += "I have no idea what you are talking about"
 		}
-		output += fmt.Sprintf("%s %s is %d Credits\n", question.amount, *question.unit, credits)
 	}
 
 	return output
