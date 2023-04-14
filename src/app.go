@@ -12,15 +12,17 @@ import (
 )
 
 const (
-	numeralPattern  = "^\\s*([a-zA-Z]+)\\s+is\\s+([IVXLCDM]+)\\s*$"
-	creditsPattern  = "^\\s*([a-zA-Z ]+)\\s+([a-zA-Z]+)\\s+is\\s+([0-9]+)\\s*[cC][rR][eE][dD][iI][tT][sS]\\s*$"
-	questionPattern = "^\\s*how\\s*(many\\s+[cC][rR][eE][dD][iI][tT][sS]|much)\\s+is\\s+([a-zA-Z ]+)\\s+([a-zA-Z]*)\\s+\\?$"
+	numeralPattern = "^\\s*([a-zA-Z]+)\\s+is\\s+([IVXLCDM]+)\\s*$"
+	creditsPattern = "^\\s*([a-zA-Z ]+)\\s+([a-zA-Z]+)\\s+is\\s+([0-9]+)\\s+[cC][rR][eE][dD][iI][tT][sS]\\s*$"
+	howMuchPattern = "^\\s*how\\s+much\\s+is\\s+([a-zA-Z ]+)\\s*\\?$"
+	howManyPattern = "^\\s*how\\s+many\\s+[cC][rR][eE][dD][iI][tT][sS]\\s+is\\s+([a-zA-Z ]+)\\s+([a-zA-Z]+)\\s*\\?$"
 )
 
 var (
-	numeralRegex  = regexp.MustCompile(numeralPattern)
-	creditsRegex  = regexp.MustCompile(creditsPattern)
-	questionRegex = regexp.MustCompile(questionPattern)
+	numeralRegex = regexp.MustCompile(numeralPattern)
+	creditsRegex = regexp.MustCompile(creditsPattern)
+	howMuchRegex = regexp.MustCompile(howMuchPattern)
+	howManyRegex = regexp.MustCompile(howManyPattern)
 
 	amountByNumeral = map[string]float64{
 		"I": 1,
@@ -122,10 +124,7 @@ func processInput(input string) string {
 			identifier := matches[1]
 			romanNumeral := matches[2]
 			numeralById[identifier] = romanNumeral
-			continue
-		}
-
-		if matches = creditsRegex.FindStringSubmatch(line); matches != nil {
+		} else if matches = creditsRegex.FindStringSubmatch(line); matches != nil {
 			amount := matches[1]
 			unit := matches[2]
 
@@ -135,26 +134,17 @@ func processInput(input string) string {
 			if credits, err := strconv.ParseFloat(matches[3], 64); err == nil {
 				originalCreditConversionByUnit[unit] = credits
 			}
-			continue
+		} else if matches = howMuchRegex.FindStringSubmatch(line); matches != nil {
+			amount := matches[1]
+			questions = append(questions, Question{"much", amount, nil})
+		} else if matches = howManyRegex.FindStringSubmatch(line); matches != nil {
+			amount := matches[1]
+			unit := strings.ReplaceAll(matches[2], " ", "")
+			questions = append(questions, Question{"many Credits", amount, &unit})
+		} else {
+			// handle unknown question type
+			questions = append(questions, Question{"not a question", "", nil})
 		}
-
-		if matches = questionRegex.FindStringSubmatch(line); matches != nil {
-			keyword := matches[1]
-			amount := matches[2]
-			unit := matches[3]
-			questions = append(questions, Question{
-				keyword,
-				amount,
-				&unit,
-			})
-			continue
-		}
-		// handle unknown question type
-		questions = append(questions, Question{
-			"not found",
-			"",
-			nil,
-		})
 	}
 
 	// calculate the amount
@@ -170,7 +160,7 @@ func processInput(input string) string {
 		if strings.Contains(question.keyword, "much") {
 			// Calculate Roman Numeral
 			_, amt := translate(numeralById, question.amount)
-			output += fmt.Sprintf("%s %s is %d\n", question.amount, *question.unit, amt)
+			output += fmt.Sprintf("%s is %d\n", question.amount, amt)
 		} else if strings.Contains(question.keyword, "many") {
 			// Transform
 			credits := question.calculate(numeralById, unitCostByUnit)

@@ -32,12 +32,12 @@ func TestProcessInput(t *testing.T) {
 	}
 }
 
-type TestCase struct {
+type TranslateTestCaseInput struct {
 	romanNumeral  string
 	arabicNumeral int
 }
 
-func TestRomanNumeral(t *testing.T) {
+func TestTranslate(t *testing.T) {
 
 	fakeIntergalacticMap := map[string]string{
 		"I": "I",
@@ -48,7 +48,7 @@ func TestRomanNumeral(t *testing.T) {
 		"D": "D",
 		"M": "M",
 	}
-	inputs := []TestCase{
+	inputs := []TranslateTestCaseInput{
 		{"I", 1},
 		{"I I", 2},
 		{"I I I", 3},
@@ -72,6 +72,8 @@ func TestRomanNumeral(t *testing.T) {
 		{"X X I X", 29},
 		{"X X X", 30},
 		{"X L", 40},
+		{"X L I", 41},
+		{"X L I I", 42},
 		{"X L I X", 49},
 		{"L", 50},
 		{"L I V", 54},
@@ -130,6 +132,45 @@ func TestRomanNumeral(t *testing.T) {
 		_, actual := translate(fakeIntergalacticMap, numeral)
 		if expected != actual {
 			t.Errorf("translate(%q) = %d, expected %d", numeral, actual, expected)
+		}
+	}
+}
+
+type CreditRegexCase struct {
+	input   string
+	amount  string
+	unit    string
+	credits string
+}
+
+func TestCreditRegexWorks(t *testing.T) {
+	inputs := []CreditRegexCase{
+		{
+			"glob glob Silver is 34 Credits",
+			"glob glob",
+			"Silver",
+			"34",
+		},
+		// {"glob prok Gold is 57800 Credits", []string{}},
+		// {"pish pish Iron is 3910 Credits", []string{}},
+	}
+
+	for _, pair := range inputs {
+		input := pair.input
+		matches := creditsRegex.FindStringSubmatch(input)
+
+		amount := matches[1]
+		unit := matches[2]
+		credits := matches[3]
+
+		if amount != pair.amount {
+			t.Errorf("creditRegex(amount) %s actual %s, expected %s", input, amount, pair.amount)
+		}
+		if unit != pair.unit {
+			t.Errorf("creditRegex(unit) %s actual %s, expected %s", input, unit, pair.unit)
+		}
+		if credits != pair.credits {
+			t.Errorf("creditRegex(credits) %s actual %s, expected %s", input, credits, pair.credits)
 		}
 	}
 }
