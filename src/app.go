@@ -135,11 +135,11 @@ func processInput(input string) string {
 				originalCreditConversionByUnit[unit] = credits
 			}
 		} else if matches = howMuchRegex.FindStringSubmatch(line); matches != nil {
-			amount := matches[1]
+			amount := strings.TrimSpace(matches[1])
 			questions = append(questions, Question{"much", amount, nil})
 		} else if matches = howManyRegex.FindStringSubmatch(line); matches != nil {
-			amount := matches[1]
-			unit := strings.ReplaceAll(matches[2], " ", "")
+			amount := strings.TrimSpace(matches[1])
+			unit := strings.TrimSpace(matches[2])
 			questions = append(questions, Question{"many Credits", amount, &unit})
 		} else {
 			// handle unknown question type
