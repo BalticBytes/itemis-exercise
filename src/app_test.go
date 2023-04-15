@@ -6,7 +6,7 @@ import (
 )
 
 func TestProcessInput(t *testing.T) {
-	input := strings.ReplaceAll(`glob is I
+	input := `glob is I
 	prok is V
 	pish is X
 	tegj is L
@@ -17,7 +17,7 @@ func TestProcessInput(t *testing.T) {
 	how many Credits is glob prok Silver ?
 	how many Credits is glob prok Gold ?
 	how many Credits is glob prok Iron ?
-	how much wood could a woodchuck chuck if a woodchuck could chuck wood ?`, "\t", "")
+	how much wood could a woodchuck chuck if a woodchuck could chuck wood ?`
 
 	expectedOutput := strings.ReplaceAll(`pish tegj glob glob is 42
 	glob prok Silver is 68 Credits
