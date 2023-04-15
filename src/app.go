@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	numeralPattern = "^\\s*([a-zA-Z]+)\\s+is\\s+([IVXLCDM]+)\\s*$"
-	creditsPattern = "^\\s*([a-zA-Z ]+)\\s+([a-zA-Z]+)\\s+is\\s+([0-9]+)\\s+[cC][rR][eE][dD][iI][tT][sS]\\s*$"
-	howMuchPattern = "^\\s*how\\s+much\\s+is\\s+([a-zA-Z ]+)\\s*\\?$"
-	howManyPattern = "^\\s*how\\s+many\\s+[cC][rR][eE][dD][iI][tT][sS]\\s+is\\s+([a-zA-Z ]+)\\s+([a-zA-Z]+)\\s*\\?$"
+	numeralPattern = "^[ \t]*([a-zA-Z]+)[ \t]+is[ \t]+([IVXLCDM]+)[ \t]*$"
+	creditsPattern = "^[ \t]*([a-zA-Z ]+)[ \t]+([a-zA-Z]+)[ \t]+is[ \t]+([0-9]+)[ \t]+[cC][rR][eE][dD][iI][tT][sS][ \t]*$"
+	howMuchPattern = "^[ \t]*how[ \t]+much[ \t]+is[ \t]+([a-zA-Z ]+)[ \t]*\\?$"
+	howManyPattern = "^[ \t]*how[ \t]+many[ \t]+[cC][rR][eE][dD][iI][tT][sS][ \t]+is[ \t]+([a-zA-Z ]+)[ \t]+([a-zA-Z]+)[ \t]*\\?$"
 )
 
 var (
