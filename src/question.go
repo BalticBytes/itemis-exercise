@@ -35,6 +35,13 @@ func NewQuestion(line string) *Question {
 	}
 }
 
+func (q Question) Equal(other interface{}) bool {
+	if o, ok := other.(Question); ok {
+		return q.keyword == o.keyword && q.amount == o.amount && q.unit == o.unit
+	}
+	return false
+}
+
 func (q Question) String() string {
 	unit := "N/A"
 	if q.unit != nil {
