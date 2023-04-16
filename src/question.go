@@ -5,6 +5,12 @@ import (
 	"strings"
 )
 
+const (
+	assignmentIndicator = "much"
+	creditsIndicator    = "many Credits"
+	invalidIndicator    = "not a question"
+)
+
 // There is no "true" enum type so keyword is just a string
 type Question struct {
 	keyword string // much | many
@@ -13,19 +19,19 @@ type Question struct {
 }
 
 func NewQuestion(line string) *Question {
-	if matches := howMuchRegex.FindStringSubmatch(line); matches != nil {
+	if matches := HowMuchRegex.FindStringSubmatch(line); matches != nil {
 
 		amount := strings.TrimSpace(matches[1])
-		return &Question{"much", amount, nil}
+		return &Question{assignmentIndicator, amount, nil}
 
-	} else if matches = howManyRegex.FindStringSubmatch(line); matches != nil {
+	} else if matches = HowManyRegex.FindStringSubmatch(line); matches != nil {
 
 		amount, unit := strings.TrimSpace(matches[1]), strings.TrimSpace(matches[2])
-		return &Question{"many Credits", amount, &unit}
+		return &Question{creditsIndicator, amount, &unit}
 
 	} else {
 		// handle unknown question type
-		return &Question{"not a question", "", nil}
+		return &Question{invalidIndicator, "", nil}
 	}
 }
 
@@ -50,16 +56,17 @@ func (q Question) calculate(m map[string]string, n map[string]float64) (sum int)
 // returns an answer to the question
 func (q Question) answer(numeralById map[string]string, unitCostByUnit map[string]float64) (answer string) {
 	switch q.keyword {
-	case "much":
+	case assignmentIndicator:
 		// Calculate Roman Numeral
 		_, amt := translate(numeralById, q.amount)
 		return fmt.Sprintf("%s is %d\n", q.amount, amt)
-	case "many Credits":
+	case creditsIndicator:
 		if q.unit != nil {
 			// Calculate credits for unit
 			credits := q.calculate(numeralById, unitCostByUnit)
 			return fmt.Sprintf("%s %s is %d Credits\n", q.amount, *q.unit, credits)
 		}
+		// well-formed questions about non-existent units are unanswerable
 		fallthrough
 	default:
 		return "I have no idea what you are talking about"
