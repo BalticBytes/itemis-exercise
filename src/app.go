@@ -35,32 +35,6 @@ var (
 	}
 )
 
-// translates a string from intergalactic transaction to roman numerals.
-func translate(numeralByIntergalacticInput map[string]string, intergalacticInput string) (string, int) {
-	parts := strings.Split(intergalacticInput, " ")
-	romanNumerals := ""
-	translated := []float64{}
-	for _, part := range parts {
-		numeral := numeralByIntergalacticInput[part]
-		translated = append(translated, amountByNumeral[numeral])
-		romanNumerals += numeral
-	}
-	// TODO Validate Roman Numerals
-	// Some symbols (letters) can be repeated up to 3 times in a row: I, X, C, M, (X), (C), (M).
-	sum := 0
-	last := -1
-	for i := len(translated) - 1; i >= 0; i-- {
-		x := int(translated[i])
-		if x < last {
-			sum -= x
-		} else {
-			sum += x
-		}
-		last = x
-	}
-	return romanNumerals, sum
-}
-
 func main() {
 	app := &cli.App{
 		Name:  "exercise",
@@ -85,7 +59,7 @@ func main() {
 	}
 }
 
-func processInput(input string) string {
+func processInput(input string) (output string) {
 
 	numeralById := map[string]string{}
 	amountByUnit := map[string]string{}
@@ -131,7 +105,6 @@ func processInput(input string) string {
 		// fmt.Printf("%12s is %12.3f Credits because %4d x %.0f \n", unit, unitCostByUnit[unit], amt, originalCreditConversionByUnit[unit])
 	}
 
-	output := ""
 	for _, question := range questions {
 		if strings.Contains(question.keyword, "much") {
 			// Calculate Roman Numeral
@@ -147,4 +120,30 @@ func processInput(input string) string {
 	}
 
 	return output
+}
+
+// translates a string from intergalactic transaction to roman numerals.
+func translate(numeralByIntergalacticInput map[string]string, intergalacticInput string) (numeral string, sum int) {
+	parts := strings.Split(intergalacticInput, " ")
+
+	translated := []float64{}
+	for _, part := range parts {
+		numeral := numeralByIntergalacticInput[part]
+		translated = append(translated, amountByNumeral[numeral])
+		numeral += numeral
+	}
+	// TODO Validate Roman Numerals
+	// Some symbols (letters) can be repeated up to 3 times in a row: I, X, C, M, (X), (C), (M).
+
+	last := -1
+	for i := len(translated) - 1; i >= 0; i-- {
+		x := int(translated[i])
+		if x < last {
+			sum -= x
+		} else {
+			sum += x
+		}
+		last = x
+	}
+	return numeral, sum
 }

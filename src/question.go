@@ -18,7 +18,7 @@ func (q Question) String() string {
 }
 
 // returns the sum of an intergalactic
-func (q Question) calculate(m map[string]string, n map[string]float64) int {
+func (q Question) calculate(m map[string]string, n map[string]float64) (sum int) {
 	_, i := translate(m, q.amount)
 
 	return int(float64(i) * n[*q.unit])
