@@ -1,7 +1,6 @@
 package main
 
 import (
-	"reflect"
 	"testing"
 )
 
@@ -12,16 +11,20 @@ func TestNewQuestion(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *Question
+		want Question
 	}{
 		// TODO: Add test cases.
+		{
+			"assignment question",
+			args{"how much is x y z ?"},
+			Question{assignmentIndicator, "x y z", nil},
+		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := NewQuestion(tt.args.line); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewQuestion() = %v, want %v", got, tt.want)
-			}
-		})
+		got := NewQuestion(tt.args.line)
+		if !got.Equal(tt.want) {
+			t.Errorf("NewQuestion() = %v, want %v", got, tt.want)
+		}
 	}
 }
 

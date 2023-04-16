@@ -43,11 +43,12 @@ func (q Question) Equal(other interface{}) bool {
 }
 
 func (q Question) String() string {
-	unit := "N/A"
+	unit := "nil"
 	if q.unit != nil {
 		unit = *q.unit
 	}
-	return fmt.Sprintf("{How %s is %s %s ?}", q.keyword, q.amount, unit)
+	// return fmt.Sprintf("{How %s is %s %s ?}", q.keyword, q.amount, unit)
+	return fmt.Sprintf("Question{keyword:'%s', amount:'%s', unit:'%s'}", q.keyword, q.amount, unit)
 }
 
 // returns the sum of an intergalactic
