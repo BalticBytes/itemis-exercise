@@ -158,7 +158,7 @@ func TestCreditRegexWorks(t *testing.T) {
 
 	for _, pair := range inputs {
 		input := pair.input
-		matches := creditsRegex.FindStringSubmatch(input)
+		matches := CreditsRegex.FindStringSubmatch(input)
 
 		amount := matches[1]
 		unit := matches[2]

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -12,11 +11,6 @@ import (
 )
 
 var (
-	numeralRegex = regexp.MustCompile(numeralPattern)
-	creditsRegex = regexp.MustCompile(creditsPattern)
-	howMuchRegex = regexp.MustCompile(howMuchPattern)
-	howManyRegex = regexp.MustCompile(howManyPattern)
-
 	amountByNumeral = map[string]float64{
 		"I": 1,
 		"V": 5,
@@ -62,12 +56,12 @@ func processInput(input string) (output string) {
 	questions := []Question{}
 	for _, line := range strings.Split(input, "\n") {
 
-		if matches := numeralRegex.FindStringSubmatch(line); matches != nil {
+		if matches := NumeralRegex.FindStringSubmatch(line); matches != nil {
 
 			identifier, romanNumeral := matches[1], matches[2]
 			numeralById[identifier] = romanNumeral
 
-		} else if matches = creditsRegex.FindStringSubmatch(line); matches != nil {
+		} else if matches = CreditsRegex.FindStringSubmatch(line); matches != nil {
 
 			amount, unit := matches[1], matches[2]
 			// We store it so that the order of the assignments is irrelevant
