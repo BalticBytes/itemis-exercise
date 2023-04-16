@@ -1,12 +1,32 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // There is no "true" enum type so keyword is just a string
 type Question struct {
 	keyword string // much | many
 	amount  string
 	unit    *string // optional
+}
+
+func NewQuestion(line string) *Question {
+	if matches := howMuchRegex.FindStringSubmatch(line); matches != nil {
+
+		amount := strings.TrimSpace(matches[1])
+		return &Question{"much", amount, nil}
+
+	} else if matches = howManyRegex.FindStringSubmatch(line); matches != nil {
+
+		amount, unit := strings.TrimSpace(matches[1]), strings.TrimSpace(matches[2])
+		return &Question{"many Credits", amount, &unit}
+
+	} else {
+		// handle unknown question type
+		return &Question{"not a question", "", nil}
+	}
 }
 
 func (q Question) String() string {

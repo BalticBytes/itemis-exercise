@@ -11,13 +11,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-const (
-	numeralPattern = "^[ \t]*([a-zA-Z]+)[ \t]+is[ \t]+([IVXLCDM]+)[ \t]*$"
-	creditsPattern = "^[ \t]*([a-zA-Z ]+)[ \t]+([a-zA-Z]+)[ \t]+is[ \t]+([0-9]+)[ \t]+[cC][rR][eE][dD][iI][tT][sS][ \t]*$"
-	howMuchPattern = "^[ \t]*how[ \t]+much[ \t]+is[ \t]+([a-zA-Z ]+)[ \t]*\\?$"
-	howManyPattern = "^[ \t]*how[ \t]+many[ \t]+[cC][rR][eE][dD][iI][tT][sS][ \t]+is[ \t]+([a-zA-Z ]+)[ \t]+([a-zA-Z]+)[ \t]*\\?$"
-)
-
 var (
 	numeralRegex = regexp.MustCompile(numeralPattern)
 	creditsRegex = regexp.MustCompile(creditsPattern)
@@ -84,19 +77,8 @@ func processInput(input string) (output string) {
 				originalCreditConversionByUnit[unit] = credits
 			}
 
-		} else if matches = howMuchRegex.FindStringSubmatch(line); matches != nil {
-
-			amount := strings.TrimSpace(matches[1])
-			questions = append(questions, Question{"much", amount, nil})
-
-		} else if matches = howManyRegex.FindStringSubmatch(line); matches != nil {
-
-			amount, unit := strings.TrimSpace(matches[1]), strings.TrimSpace(matches[2])
-			questions = append(questions, Question{"many Credits", amount, &unit})
-
 		} else {
-			// handle unknown question type
-			questions = append(questions, Question{"not a question", "", nil})
+			questions = append(questions, *NewQuestion(line))
 		}
 	}
 
