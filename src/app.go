@@ -67,56 +67,47 @@ func processInput(input string) (output string) {
 	unitCostByUnit := map[string]float64{}
 
 	questions := []Question{}
-	var matches []string
 	for _, line := range strings.Split(input, "\n") {
 
-		if matches = numeralRegex.FindStringSubmatch(line); matches != nil {
-			identifier := matches[1]
-			romanNumeral := matches[2]
-			numeralById[identifier] = romanNumeral
-		} else if matches = creditsRegex.FindStringSubmatch(line); matches != nil {
-			amount := matches[1]
-			unit := matches[2]
+		if matches := numeralRegex.FindStringSubmatch(line); matches != nil {
 
+			identifier, romanNumeral := matches[1], matches[2]
+			numeralById[identifier] = romanNumeral
+
+		} else if matches = creditsRegex.FindStringSubmatch(line); matches != nil {
+
+			amount, unit := matches[1], matches[2]
 			// We store it so that the order of the assignments is irrelevant
 			amountByUnit[unit] = amount
 
 			if credits, err := strconv.ParseFloat(matches[3], 64); err == nil {
 				originalCreditConversionByUnit[unit] = credits
 			}
+
 		} else if matches = howMuchRegex.FindStringSubmatch(line); matches != nil {
+
 			amount := strings.TrimSpace(matches[1])
 			questions = append(questions, Question{"much", amount, nil})
+
 		} else if matches = howManyRegex.FindStringSubmatch(line); matches != nil {
-			amount := strings.TrimSpace(matches[1])
-			unit := strings.TrimSpace(matches[2])
+
+			amount, unit := strings.TrimSpace(matches[1]), strings.TrimSpace(matches[2])
 			questions = append(questions, Question{"many Credits", amount, &unit})
+
 		} else {
 			// handle unknown question type
 			questions = append(questions, Question{"not a question", "", nil})
 		}
 	}
 
-	// calculate the amount
-
+	// Calculating the amount after reading all input s.t. order of "assignments" doesnt matter
 	for unit, amount := range amountByUnit {
 		_, amt := translate(numeralById, amount)
 		unitCostByUnit[unit] = originalCreditConversionByUnit[unit] / float64(amt)
-		// fmt.Printf("%12s is %12.3f Credits because %4d x %.0f \n", unit, unitCostByUnit[unit], amt, originalCreditConversionByUnit[unit])
 	}
 
 	for _, question := range questions {
-		if strings.Contains(question.keyword, "much") {
-			// Calculate Roman Numeral
-			_, amt := translate(numeralById, question.amount)
-			output += fmt.Sprintf("%s is %d\n", question.amount, amt)
-		} else if strings.Contains(question.keyword, "many") {
-			// Transform
-			credits := question.calculate(numeralById, unitCostByUnit)
-			output += fmt.Sprintf("%s %s is %d Credits\n", question.amount, *question.unit, credits)
-		} else {
-			output += "I have no idea what you are talking about"
-		}
+		output += question.answer(numeralById, unitCostByUnit)
 	}
 
 	return output
