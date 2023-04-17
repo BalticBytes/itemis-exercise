@@ -118,13 +118,8 @@ func translate(numeralByIntergalacticInput map[string]string, intergalacticInput
 		translated = append(translated, amountByNumeral[numeral])
 		numeralSeq += numeral
 	}
-	// TODO Validate Roman Numerals
-	// Some symbols (letters) can be repeated up to 3 times in a row: I, X, C, M, (X), (C), (M).
-	// Rule: If a symbol is repeated up to three times in a row, and it is not one of the subtractive symbols (I, X, C), the numeral is invalid.
-	// Also, subtractive symbols (I, X, C) can only be used in decreasing value order.
 
 	// src: https://www.geeksforgeeks.org/validating-roman-numerals-using-regular-expression/
-
 	if !ValidationRegex.MatchString(numeralSeq) {
 		return "", 0
 	}

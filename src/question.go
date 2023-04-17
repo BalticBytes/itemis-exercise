@@ -22,7 +22,7 @@ type Question struct {
 func NewQuestion(line string) *Question {
 	// replace all occurences of 1..N whitespaces with single whitespace
 	line = strings.Join(WhitespaceRegex.Split(line, -1), " ")
-	
+
 	if matches := HowMuchRegex.FindStringSubmatch(line); matches != nil {
 
 		amount := strings.TrimSpace(matches[1])
@@ -78,6 +78,6 @@ func (q Question) answer(numeralById map[string]string, unitCostByUnit map[strin
 		// well-formed questions about non-existent units are unanswerable
 		fallthrough
 	default:
-		return "I have no idea what you are talking about"
+		return "I have no idea what you are talking about\n"
 	}
 }
