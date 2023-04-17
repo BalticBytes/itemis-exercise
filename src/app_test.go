@@ -34,14 +34,21 @@ func TestProcessInput(t *testing.T) {
 		{
 			"should work",
 			`one is I
-		five is V
-		five X is 10 Credits
-		five Y is 20 Credits
-		how many Credits is one one X?
-		how many Credits is one one Y?`,
+	five is V
+	five X is 10 Credits
+	five Y is 20 Credits
+	how many Credits is one one X?
+	how many Credits is one one Y?`,
 			`one one X is 4 Credits
-		one one Y is 8 Credits
-		`},
+	one one Y is 8 Credits
+	`},
+		{
+			"should not work",
+			`five X is 10 Credits
+	five Y is 20 Credits
+	how many Credits is one one X?`,
+			`I have no idea what you are talking about
+	`},
 	}
 
 	for _, tt := range tests {

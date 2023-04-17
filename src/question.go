@@ -73,7 +73,9 @@ func (q Question) answer(numeralById map[string]string, unitCostByUnit map[strin
 		if q.unit != nil {
 			// Calculate credits for unit
 			credits := q.calculate(numeralById, unitCostByUnit)
-			return fmt.Sprintf("%s %s is %d Credits\n", q.amount, *q.unit, credits)
+			if 0 < credits {
+				return fmt.Sprintf("%s %s is %d Credits\n", q.amount, *q.unit, credits)
+			}
 		}
 		// well-formed questions about non-existent units are unanswerable
 		fallthrough

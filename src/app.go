@@ -98,7 +98,9 @@ func processInput(input string) (output string) {
 	// Calculating the amount after reading all input s.t. order of "assignments" doesnt matter
 	for unit, amount := range amountByUnit {
 		_, amt := translate(numeralById, amount)
-		unitCostByUnit[unit] = originalCreditConversionByUnit[unit] / float64(amt)
+		if 0 < amt {
+			unitCostByUnit[unit] = originalCreditConversionByUnit[unit] / float64(amt)
+		}
 	}
 
 	for _, question := range questions {
