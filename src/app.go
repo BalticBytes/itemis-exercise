@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/urfave/cli/v2"
 )
@@ -24,8 +25,26 @@ var (
 
 func main() {
 	app := &cli.App{
-		Name:  "exercise",
-		Usage: "Input => Output",
+		Name:     "intergalactic unit conversion",
+		Version:  "v0.0.1",
+		Compiled: time.Now(),
+		Usage:    "cli <TEXT>",
+		UsageText: `
+		TEXT can include assignments and questions.
+		Assignments can map intergalactic speak to roman numerals and convey price information:
+			'x is I'
+			'y is V'
+			'z is X'
+		  'x y Gold is 15 Credits'
+		Questions can inquire about amounts or prices:
+		  'how much is x y z ?'
+		  'how many Credits is x y z Gold?'
+		
+		Note that a question about prices requires information in the TEXT.
+		`,
+		CommandNotFound: func(cCtx *cli.Context, command string) {
+			fmt.Println("I have no idea what you are talking about")
+		},
 		Action: func(c *cli.Context) error {
 			args := c.Args()
 
