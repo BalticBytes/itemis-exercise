@@ -33,11 +33,6 @@ func TestProcessInput(t *testing.T) {
 	}
 }
 
-type TranslateTestCaseInput struct {
-	romanNumeral  string
-	arabicNumeral int
-}
-
 func TestTranslate(t *testing.T) {
 
 	fakeIntergalacticMap := map[string]string{
@@ -49,7 +44,10 @@ func TestTranslate(t *testing.T) {
 		"D": "D",
 		"M": "M",
 	}
-	inputs := []TranslateTestCaseInput{
+	inputs := []struct {
+		romanNumeral  string
+		arabicNumeral int
+	}{
 		{"I", 1},
 		{"I I", 2},
 		{"I I I", 3},
@@ -137,15 +135,47 @@ func TestTranslate(t *testing.T) {
 	}
 }
 
-type CreditRegexCase struct {
-	input   string
-	amount  string
-	unit    string
-	credits string
+func TestInvalidTranslate(t *testing.T) {
+
+	fakeIntergalacticMap := map[string]string{
+		"I": "I",
+		"V": "V",
+		"X": "X",
+		"L": "L",
+		"C": "C",
+		"D": "D",
+		"M": "M",
+	}
+	inputs := []struct {
+		romanNumeral  string
+		arabicNumeral int
+	}{
+		{"V V", 0},
+		{"L X L", 0},
+		{"D D D", 0},
+		{"I I I I I X", 0},
+		{"C C C C X M", 0},
+		{"V X", 0},
+		{"I L", 0},
+	}
+
+	for _, pair := range inputs {
+		numeral := pair.romanNumeral
+		expected := pair.arabicNumeral
+		_, actual := translate(fakeIntergalacticMap, numeral)
+		if expected != actual {
+			t.Errorf("translate(%q) = '%d', expected '%d'", numeral, actual, expected)
+		}
+	}
 }
 
 func TestCreditRegexWorks(t *testing.T) {
-	inputs := []CreditRegexCase{
+	inputs := []struct {
+		input   string
+		amount  string
+		unit    string
+		credits string
+	}{
 		{
 			"glob glob Silver is 34 Credits",
 			"glob glob",

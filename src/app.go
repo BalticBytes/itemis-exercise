@@ -109,17 +109,25 @@ func processInput(input string) (output string) {
 }
 
 // translates a string from intergalactic transaction to roman numerals.
-func translate(numeralByIntergalacticInput map[string]string, intergalacticInput string) (numeral string, sum int) {
+func translate(numeralByIntergalacticInput map[string]string, intergalacticInput string) (numeralSeq string, sum int) {
 	parts := strings.Split(intergalacticInput, " ")
 
 	translated := []float64{}
 	for _, part := range parts {
 		numeral := numeralByIntergalacticInput[part]
 		translated = append(translated, amountByNumeral[numeral])
-		numeral += numeral
+		numeralSeq += numeral
 	}
 	// TODO Validate Roman Numerals
 	// Some symbols (letters) can be repeated up to 3 times in a row: I, X, C, M, (X), (C), (M).
+	// Rule: If a symbol is repeated up to three times in a row, and it is not one of the subtractive symbols (I, X, C), the numeral is invalid.
+	// Also, subtractive symbols (I, X, C) can only be used in decreasing value order.
+
+	// src: https://www.geeksforgeeks.org/validating-roman-numerals-using-regular-expression/
+
+	if !ValidationRegex.MatchString(numeralSeq) {
+		return "", 0
+	}
 
 	last := -1
 	for i := len(translated) - 1; i >= 0; i-- {
@@ -131,5 +139,6 @@ func translate(numeralByIntergalacticInput map[string]string, intergalacticInput
 		}
 		last = x
 	}
-	return numeral, sum
+
+	return numeralSeq, sum
 }
