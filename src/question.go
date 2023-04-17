@@ -20,6 +20,9 @@ type Question struct {
 }
 
 func NewQuestion(line string) *Question {
+	// replace all occurences of 1..N whitespaces with single whitespace
+	line = strings.Join(WhitespaceRegex.Split(line, -1), " ")
+	
 	if matches := HowMuchRegex.FindStringSubmatch(line); matches != nil {
 
 		amount := strings.TrimSpace(matches[1])
