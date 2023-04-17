@@ -89,7 +89,8 @@ func processInput(input string) (output string) {
 			if credits, err := strconv.ParseFloat(matches[3], 64); err == nil {
 				originalCreditConversionByUnit[unit] = credits
 			}
-
+		} else if strings.TrimSpace(line) == "" {
+			// ignore empty lines
 		} else {
 			questions = append(questions, *NewQuestion(line))
 		}
@@ -110,7 +111,7 @@ func processInput(input string) (output string) {
 	return output
 }
 
-// translates a string from intergalactic transaction to roman numerals.
+// translates a string from intergalactic transaction to roman numerals. 0 indicates an invalid numeral
 func translate(numeralByIntergalacticInput map[string]string, intergalacticInput string) (numeralSeq string, sum int) {
 	parts := strings.Split(intergalacticInput, " ")
 
@@ -121,7 +122,6 @@ func translate(numeralByIntergalacticInput map[string]string, intergalacticInput
 		numeralSeq += numeral
 	}
 
-	// src: https://www.geeksforgeeks.org/validating-roman-numerals-using-regular-expression/
 	if !ValidationRegex.MatchString(numeralSeq) {
 		return "", 0
 	}

@@ -6,6 +6,7 @@ import (
 )
 
 func TestProcessInput(t *testing.T) {
+	// outputs in these test cases are whitespace sensitive ...
 	tests := []struct {
 		name   string
 		arg    string
@@ -32,16 +33,43 @@ func TestProcessInput(t *testing.T) {
 	I have no idea what you are talking about
 	`},
 		{
-			"should work",
+			"should work in normal order",
 			`one is I
-	five is V
-	five X is 10 Credits
-	five Y is 20 Credits
-	how many Credits is one one X?
-	how many Credits is one one Y?`,
+five is V
+five X is 10 Credits
+five Y is 20 Credits
+how many Credits is one one X?
+how many Credits is one one Y?`,
 			`one one X is 4 Credits
-	one one Y is 8 Credits
-	`},
+one one Y is 8 Credits
+`},
+		{
+			"should work in any order",
+			`how many Credits is one one X?
+	one is I
+	five X is 10 Credits
+	how many Credits is one one Y?
+	five is V
+	five Y is 20 Credits`,
+			`one one X is 4 Credits
+one one Y is 8 Credits
+`},
+		{
+			"should work with empty lines",
+			`how many Credits is one one X?
+
+	one is I
+
+	five X is 10 Credits
+
+	how many Credits is one one Y?
+
+	five is V
+	
+	five Y is 20 Credits`,
+			`one one X is 4 Credits
+one one Y is 8 Credits
+`},
 		{
 			"should not work",
 			`five X is 10 Credits
