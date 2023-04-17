@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -36,10 +37,7 @@ func NewQuestion(line string) *Question {
 }
 
 func (q Question) Equal(other interface{}) bool {
-	if o, ok := other.(Question); ok {
-		return q.keyword == o.keyword && q.amount == o.amount && q.unit == o.unit
-	}
-	return false
+	return reflect.DeepEqual(q, other)
 }
 
 func (q Question) String() string {
