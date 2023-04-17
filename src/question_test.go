@@ -1,10 +1,51 @@
 package main
 
 import (
+	"math/rand"
+	"strings"
 	"testing"
+	"unicode"
 )
 
-func TestNewQuestion(t *testing.T) {
+// replaces a substring with randomised case.
+func randomCase(src string, toRandomise string) string {
+
+	sb := strings.Builder{}
+	parts := strings.Split(src, toRandomise)
+
+	sb.WriteString(parts[0])
+	for _, r := range toRandomise {
+		if rand.Intn(2) == 0 {
+			sb.WriteString(strings.ToUpper(string(r)))
+		} else {
+			sb.WriteString(strings.ToLower(string(r)))
+		}
+	}
+	sb.WriteString(parts[1])
+
+	return sb.String()
+}
+
+// replaces whitespace with an increased amount of random whitespace.
+func randomPad(src string, min int, max int) string {
+	sb := strings.Builder{}
+
+	for _, r := range src {
+		if unicode.IsSpace(r) {
+			count := min + rand.Intn(max-min+1)
+			for i := 0; i < count; i++ {
+				sb.WriteRune(' ')
+			}
+		} else {
+			sb.WriteString(string(r))
+		}
+	}
+
+	return sb.String()
+}
+
+func TestNewCreditsQuestion(t *testing.T) {
+	metalUnit := "Metal"
 	type args struct {
 		line string
 	}
@@ -13,7 +54,47 @@ func TestNewQuestion(t *testing.T) {
 		args args
 		want Question
 	}{
-		// TODO: Add test cases.
+		{
+			"credits question: ignore case",
+			args{"how many Credits is x Metal?"},
+			Question{creditsIndicator, "x", &metalUnit},
+		},
+		{
+			"credits question: 1 var",
+			args{"how many Credits is x Metal?"},
+			Question{creditsIndicator, "x", &metalUnit},
+		},
+		{
+			"credits question: 2 vars",
+			args{"how many Credits is x y Metal?"},
+			Question{creditsIndicator, "x y", &metalUnit},
+		},
+		{
+			"credits question: 3 vars",
+			args{"how many Credits is x y z Metal?"},
+			Question{creditsIndicator, "x y z", &metalUnit},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			input := randomPad(randomCase(tt.args.line, "Credits"), 1, 3)
+			got := NewQuestion(input)
+			if !got.Equal(tt.want) {
+				t.Errorf("NewQuestion = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewAssignmentQuestion(t *testing.T) {
+	type args struct {
+		line string
+	}
+	tests := []struct {
+		name string
+		args args
+		want Question
+	}{
 		{
 			"assignment question",
 			args{"how much is x y z ?"},
@@ -21,13 +102,51 @@ func TestNewQuestion(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		got := NewQuestion(tt.args.line)
-		if !got.Equal(tt.want) {
-			t.Errorf("NewQuestion() = %v, want %v", got, tt.want)
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			input := randomPad(tt.args.line, 1, 3)
+			got := NewQuestion(input)
+			if !got.Equal(tt.want) {
+				t.Errorf("actual: %v, expected: %v", got, tt.want)
+			}
+		})
 	}
 }
 
+func TestNewInvalidQuestion(t *testing.T) {
+	type args struct {
+		line string
+	}
+	tests := []struct {
+		name string
+		args args
+		want Question
+	}{
+		{
+			"invalid question: no unit",
+			args{"how many Credits is one?"},
+			Question{invalidIndicator, "", nil},
+		},
+		{
+			"invalid question: mixed assignment and credits",
+			args{"how much Credits is one Metal?"},
+			Question{invalidIndicator, "", nil},
+		},
+		{
+			"invalid question: lorem ipsum",
+			args{"Lorem ipsum dolor sit amet, consectetur adipiscing elit."},
+			Question{invalidIndicator, "", nil},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			input := randomPad(tt.args.line, 1, 3)
+			got := NewQuestion(input)
+			if !got.Equal(tt.want) {
+				t.Errorf("actual: %v, expected: %v", got, tt.want)
+			}
+		})
+	}
+}
 func TestQuestion_calculate(t *testing.T) {
 	type args struct {
 		m map[string]string
