@@ -3,7 +3,7 @@
 I chose problem 3. 
 You can find the full description in [Problem.md](PROBLEM.md).
 
-Usually, I squash commits and delete the branch after merging from it.
+Usually, I delete the branch after merging from it.
 However, I made an exception this time so you can follow along on the respective feature branches.
 
 
